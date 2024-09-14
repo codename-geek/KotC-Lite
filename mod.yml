@@ -1,0 +1,16 @@
+title: (Lite) King of the Crown Tourney Mod Pack v3.1
+description: ------------------------------------------------------ Place above the GoA | For Steam/Epic 1.0.0.9 Version ------------------------------------------------------ Sonicshadowsilver's Cutscene Skipper | GhostTheBoo's Accurate Growth Text | Geek's GoA Edit Final Fights Unlocker
+assets:
+# Lua Scripts
+- name: scripts/CutsceneSkipper.lua
+  method: copy
+  source:
+  - name: CutsceneSkipper.lua
+- name: scripts/AccurateGrowthText.lua
+  method: copy
+  source:
+  - name: AccurateGrowthText.lua
+- name: scripts/F266B00B GoA ROM.lua
+  method: copy
+  source:
+  - name: F266B00B GoA ROM.lua
