@@ -9,7 +9,10 @@ function _OnInit()
 GameVersion = 0
 print('GoA v1.54.1')
 GoAOffset = 0x7C
-SeedCleared = false
+SeedCleared = 0
+WinCon1 = false
+WinCon2 = false
+WinCon3 = false
 CheckCount = 0
 end
 
@@ -351,7 +354,7 @@ end
 
 function GoA()
 --Clear Conditions
-if not SeedCleared then
+if true then
 	local ObjectiveCount = ReadShort(BAR(Sys3,0x6,0x4F4),OnPC)
 	local ProofCount = 0
 	if ReadByte(Save+0x36B2) > 0 then
@@ -367,25 +370,43 @@ if not SeedCleared then
 	--For Normal 3 Proof
 	if ObjectiveCount == 0 then
 		if ProofCount >= 3 then --All Proofs Obtained
-			SeedCleared = true
+			SeedCleared = 1
 		end
 	--For Objectives and/or Proofs Win Con
 	else
-		if ProofCount >= 3 and ReadByte(Save+0x363D) >= 1 then --All Proofs Obtained + 1 Objective
-			SeedCleared = true
+		if ProofCount >= 3 and ReadByte(Save+0x363D) >= 1
+		   and not WinCon1 then --All Proofs Obtained + 1 Objective
+			SeedCleared = SeedCleared + 1
+			WinCon1 = true
+			ConsolePrint("Win con 1 achieved - 3 Proofs + 1 Objective")
+			if WinCon2 or WinCon3 then
+				ConsolePrint("Multiple win cons achieved - Skip to Final Xemnas Active")
+			end
 		end
-		if ProofCount >= 1 and ReadByte(Save+0x363D) >= ObjectiveCount - 2 then --At least 1 Proof + Requisite Objective Count Achieved - 2
-			SeedCleared = true
+		if ProofCount >= 1 and ReadByte(Save+0x363D) >= ObjectiveCount - 2
+		   and not WinCon2 then --At least 1 Proof + Requisite Objective Count Achieved - 2
+			SeedCleared = SeedCleared + 1
+			WinCon2 = true
+			ConsolePrint("Win con 2 achieved - 1 Proofs + 6 Objectives")
+			if WinCon1 or WinCon3 then
+				ConsolePrint("Multiple win cons achieved - Skip to Final Xemnas Active")
+			end
 		end
-		if (ReadByte(Save+0x363D) + ReadByte(Save+0x360C)) >= ObjectiveCount then --Requisite Objective Count Achieved (+"ignored" first-visit bosses)
-			SeedCleared = true
+		if (ReadByte(Save+0x363D) + ReadByte(Save+0x360C)) >= ObjectiveCount
+		   and not WinCon3 then --Requisite Objective Count Achieved (+"ignored" first-visit bosses)
+			SeedCleared = SeedCleared + 1
+			WinCon3 = true
+			ConsolePrint("Win con 3 achieved - 8 Objectives")
+			if WinCon1 or WinCon2 then
+				ConsolePrint("Multiple win cons achieved - Skip to Final Xemnas Active")
+			end
 		end
 	end
 end
 --Garden of Assemblage Rearrangement
 if Place == 0x1A04 then
 	--Open Promise Charm Path
-	if SeedCleared and ReadByte(Save+0x3694) > 0 then --Seed Cleared & Promise Charm
+	if SeedCleared >= 1 and ReadByte(Save+0x3694) > 0 then --Seed Cleared & Promise Charm
 		WriteShort(BAR(ARD,0x06,0x05C),0x77A,OnPC) --Text
 	end
 	--Demyx's Portal Text
@@ -1005,11 +1026,11 @@ if ReadByte(Save+0x1EDE) > 0 then
 	end
 end
 --Final Door Requirements
-if ReadShort(Save+0x1B7C) == 0x04 and SeedCleared then
+if ReadShort(Save+0x1B7C) == 0x04 and SeedCleared >= 1 then
 	WriteShort(Save+0x1B7C, 0x0D) --The Altar of Naught MAP (Door RC Available)
 end
 --Warp Sora to Final Xem if ABN, custom edit code
-if Place == 6930 and CheckCount == 63 then
+if Place == 6930 and (CheckCount == 63 or SeedCleared > 1) then
 	--Warp into the appropriate World, Room, Door, Map, Btl, Evt
 	Warp(18,20,0,74,74,74)
 end
