@@ -7,20 +7,30 @@ LUAGUI_DESC = 'A GoA build for use with the Randomizer. Requires ROM patching.'
 
 function _OnInit()
 GameVersion = 0
-print('GoA v1.54.1')
+print('GoA v1.54.3')
 GoAOffset = 0x7C
 SeedCleared = 0
 WinCon1 = false
 WinCon2 = false
 WinCon3 = false
+WinCon4 = false --fake win con cause it's just Win Con 1 + ABN
 CheckCount = 0
+
+bulky_Room = 0x00
+bulky_lastRoom = 0x00
+bulky_World = 0x00
+bulky_lastWorld = 0x00
+
+infoBoxText = "oops"
+doInfoBox = false
+infoBoxTick = 0
 end
 
 function GetVersion() --Define anchor addresses
 if (GAME_ID == 0xF266B00B or GAME_ID == 0xFAF99301) and ENGINE_TYPE == "ENGINE" then --PCSX2
 	OnPC = false
 	GameVersion = 1
-	print('GoA PS2 Version - Custom Win Con Edits')
+	print('GoA PS2 Version - KotC GoA')
 	Now = 0x032BAE0 --Current Location
 	Sve = 0x1D5A970 --Saved Location
 	Save = 0x032BB30 --Save File
@@ -62,7 +72,7 @@ elseif GAME_ID == 0x431219CC and ENGINE_TYPE == 'BACKEND' then --PC
 	OnPC = true
 	if ReadString(0x09A92F0,4) == 'KH2J' then --EGS
 		GameVersion = 2
-		print('GoA Epic Version - Custom Win Con Edits')
+		print('GoA Epic Version (v.9) - KotC GoA')
 		Now = 0x0716DF8
 		Sve = 0x2A0BF80
 		Save = 0x09A92F0
@@ -102,7 +112,7 @@ elseif GAME_ID == 0x431219CC and ENGINE_TYPE == 'BACKEND' then --PC
 		MSN = 0x0BF2C40
 	elseif ReadString(0x09A9830,4) == 'KH2J' then --Steam Global
 		GameVersion = 3
-		print('GoA Steam Global Version - Custom Win Con Edits')
+		print('GoA Steam Global Version (v.1) - KotC GoA')
 		Now = 0x0717008
 		Sve = 0x2A0C4C0
 		Save = 0x09A9830
@@ -142,7 +152,7 @@ elseif GAME_ID == 0x431219CC and ENGINE_TYPE == 'BACKEND' then --PC
 		MSN = 0x0BF3340
 	elseif ReadString(0x09A8830,4) == 'KH2J' then --Steam JP
 		GameVersion = 4
-		print('GoA Steam JP Version - Custom Win Con Edits')
+		print('GoA Steam JP Version (v.1) - KotC GoA')
 		Now = 0x0716008
 		Sve = 0x2A0B4C0
 		Save = 0x09A8830
@@ -180,6 +190,126 @@ elseif GAME_ID == 0x431219CC and ENGINE_TYPE == 'BACKEND' then --PC
 		Sys3 = ReadLong(Sys3Pointer)
 		Btl0 = ReadLong(Btl0Pointer)
 		MSN = 0x0BF2340
+	elseif ReadString(0x9A9330,4) == 'KH2J' then --EGS
+		GameVersion = 5
+		print('GoA Epic Version (v.10) - KotC GoA')
+		Now = 0x0716DF8
+		Sve = 0x2A0BFC0
+		Save = 0x09A9330
+		Obj0Pointer = 0x2A24AB0
+		Sys3Pointer = 0x2AE58D0
+		Btl0Pointer = 0x2AE58D8
+		ARDPointer = 0x2A0F2A8
+		Music = 0x0ABA7C4
+		Pause = 0x0ABB2F8
+		React = 0x2A10BE2
+		Cntrl = 0x2A16C68
+		Timer = 0x0ABB2D0
+		Songs = 0x0B657F4
+		GScre = 0x072AEB0
+		GMdal = 0x072B044
+		GKill = 0x0AF6BC6
+		CamTyp = 0x0718A98
+		GamSpd = 0x0717214
+		CutNow = 0x0B64A18
+		CutLen = 0x0B64A34
+		CutSkp = 0x0B64A1C
+		BtlTyp = 0x2A10E84
+		BtlEnd = 0x2A0F760
+		TxtBox = 0x074DCB0
+		DemCln = 0x2A0F334
+		Slot1    = 0x2A23018
+		NextSlot = 0x278
+		Point1   = 0x2A0F4C8
+		NxtPoint = 0x50
+		Gauge1   = 0x2A0F5B8
+		NxtGauge = 0x48
+		Menu1    = 0x2A10B90
+		NextMenu = 0x8
+		Obj0 = ReadLong(Obj0Pointer)
+		Sys3 = ReadLong(Sys3Pointer)
+		Btl0 = ReadLong(Btl0Pointer)
+		MSN = 0x0BF2C80
+	elseif ReadString(0x9A98B0,4) == 'KH2J' then --Steam Global
+		GameVersion = 6
+		print('GoA Steam Global Version (v.2) - KotC GoA')
+		Now = 0x0717008
+		Sve = 0x2A0C540
+		Save = 0x09A98B0
+		Obj0Pointer = 0x2A25030
+		Sys3Pointer = 0x2AE5E50
+		Btl0Pointer = 0x2AE5E58
+		ARDPointer = 0x2A0F828
+		Music = 0x0ABAD44
+		Pause = 0x0ABB878
+		React = 0x2A11162
+		Cntrl = 0x2A171E8
+		Timer = 0x0ABB850
+		Songs = 0x0B65D44
+		GScre = 0x072B130
+		GMdal = 0x072B2C4
+		GKill = 0x0AF7146
+		CamTyp = 0x0718CA8
+		GamSpd = 0x0717424
+		CutNow = 0x0B64F98
+		CutLen = 0x0B64FB4
+		CutSkp = 0x0B64F9C
+		BtlTyp = 0x2A11404
+		BtlEnd = 0x2A0FCE0
+		TxtBox = 0x074DF20
+		DemCln = 0x2A0F8B4
+		Slot1    = 0x2A23598
+		NextSlot = 0x278
+		Point1   = 0x2A0FA48
+		NxtPoint = 0x50
+		Gauge1   = 0x2A0FB38
+		NxtGauge = 0x48
+		Menu1    = 0x2A11110
+		NextMenu = 0x8
+		Obj0 = ReadLong(Obj0Pointer)
+		Sys3 = ReadLong(Sys3Pointer)
+		Btl0 = ReadLong(Btl0Pointer)
+		MSN = 0x0BF33C0
+	elseif ReadString(0x9A98B0,4) == 'KH2J' then --Steam JP (same as Global for now)
+		GameVersion = 7
+		print('GoA Steam JP Version (v.2) - KotC GoA')
+		Now = 0x0717008
+		Sve = 0x2A0C540
+		Save = 0x09A98B0
+		Obj0Pointer = 0x2A25030
+		Sys3Pointer = 0x2AE5E50
+		Btl0Pointer = 0x2AE5E58
+		ARDPointer = 0x2A0F828
+		Music = 0x0ABAD44
+		Pause = 0x0ABB878
+		React = 0x2A11162
+		Cntrl = 0x2A171E8
+		Timer = 0x0ABB850
+		Songs = 0x0B65D74
+		GScre = 0x072B130
+		GMdal = 0x072B2C4
+		GKill = 0x0AF7146
+		CamTyp = 0x0718CA8
+		GamSpd = 0x0717424
+		CutNow = 0x0B64F98
+		CutLen = 0x0B64FB4
+		CutSkp = 0x0B64F9C
+		BtlTyp = 0x2A11404
+		BtlEnd = 0x2A0FCE0
+		TxtBox = 0x074DF20
+		DemCln = 0x2A0F8B4
+		Slot1    = 0x2A23598
+		NextSlot = 0x278
+		Point1   = 0x2A0FA48
+		NxtPoint = 0x50
+		Gauge1   = 0x2A0FB38
+		NxtGauge = 0x48
+		Menu1    = 0x2A11110
+		NextMenu = 0x8
+		Obj0 = ReadLong(Obj0Pointer)
+		Sys3 = ReadLong(Sys3Pointer)
+		Btl0 = ReadLong(Btl0Pointer)
+		MSN = 0x0BF33C0
 	end
 end
 if GameVersion ~= 0 then
@@ -301,6 +431,9 @@ if true then --Define current values for common addresses
 		ARD = ReadLong(ARDPointer)
 	end
 end
+
+ABN()
+
 NewGame()
 GoA()
 TWtNW()
@@ -320,8 +453,8 @@ AW()
 At()
 Data()
 
-ABN()
 ObjFix()
+WinConInfoBox()
 end
 
 function NewGame()
@@ -349,6 +482,15 @@ if Place == 0x2002 and Events(0x01,Null,0x01) then --Station of Serenity Weapons
 	WriteShort(Save+0x4270,0x1FF) --Pause Menu Tutorial Prompts Seen Flags
 	WriteShort(Save+0x4274,0x1FF) --Status Form & Summon Seen Flags
 	BitOr(Save+0x49F0,0x03) --Shop Tutorial Prompt Flags (1=Big Shops, 2=Small Shops)
+	--Fix for a softlock added on purpose for debugging purposes
+	--It'll warp you to Wedding Ship if Lua isn't running; this code will warp you properly to GoA)
+	if ReadShort(BAR(ARD,0x0A,0xD6),OnPC) == 0x0B and ReadShort(BAR(ARD,0x0A,0xD8),OnPC) == 0x0A then
+		WriteShort(BAR(ARD,0x0A,0xD6),0x04,OnPC)
+		WriteShort(BAR(ARD,0x0A,0xD8),0x1A,OnPC)
+	elseif ReadShort(BAR(ARD,0x0A,0xDE),OnPC) == 0x0B and ReadShort(BAR(ARD,0x0A,0xE0),OnPC) == 0x0A then
+		WriteShort(BAR(ARD,0x0A,0xDE),0x04,OnPC)
+		WriteShort(BAR(ARD,0x0A,0xE0),0x1A,OnPC)
+	end
 end
 end
 
@@ -369,38 +511,99 @@ if true then
 
 	--For Normal 3 Proof
 	if ObjectiveCount == 0 then
+		NoExp()
 		if ProofCount >= 3 then --All Proofs Obtained
 			SeedCleared = 1
 		end
 	--For Objectives and/or Proofs Win Con
-	else
+	elseif ObjectiveCount == 8 then
+		NoExp()
 		if ProofCount >= 3 and ReadByte(Save+0x363D) >= 1
 		   and not WinCon1 then --All Proofs Obtained + 1 Objective
 			SeedCleared = SeedCleared + 1
 			WinCon1 = true
-			ConsolePrint("Win con 1 achieved - 3 Proofs + 1 Objective")
 			if WinCon2 or WinCon3 then
-				ConsolePrint("Multiple win cons achieved - Skip to Final Xemnas Active")
+				WriteInfoBox('Win con 1 achieved - 3 Proofs + 1 Objective - Skip to Final Xemnas Active')
+			else
+				WriteInfoBox('Win con 1 achieved - 3 Proofs + 1 Objective')
 			end
+		end
+		if ProofCount >= 3 and ReadByte(Save+0x363D) >= 1 and CheckCount == 63
+		   and not WinCon4 then --Win Con 1 + ABN
+			WinCon4 = true
+			WriteInfoBox('Alternate win con 1 achieved - ABN - Skip to Final Xemnas Active')
 		end
 		if ProofCount >= 1 and ReadByte(Save+0x363D) >= ObjectiveCount - 2
 		   and not WinCon2 then --At least 1 Proof + Requisite Objective Count Achieved - 2
 			SeedCleared = SeedCleared + 1
 			WinCon2 = true
-			ConsolePrint("Win con 2 achieved - 1 Proofs + 6 Objectives")
 			if WinCon1 or WinCon3 then
-				ConsolePrint("Multiple win cons achieved - Skip to Final Xemnas Active")
+				WriteInfoBox('Win con 2 achieved - 1 Proof + 6 Objectives - Skip to Final Xemnas Active')
+			else
+				WriteInfoBox('Win con 2 achieved - 1 Proof + 6 Objectives')
 			end
 		end
 		if (ReadByte(Save+0x363D) + ReadByte(Save+0x360C)) >= ObjectiveCount
 		   and not WinCon3 then --Requisite Objective Count Achieved (+"ignored" first-visit bosses)
 			SeedCleared = SeedCleared + 1
 			WinCon3 = true
-			ConsolePrint("Win con 3 achieved - 8 Objectives")
 			if WinCon1 or WinCon2 then
-				ConsolePrint("Multiple win cons achieved - Skip to Final Xemnas Active")
+				WriteInfoBox('Win con 3 achieved - 8 Objectives - Skip to Final Xemnas Active')
+			else
+				WriteInfoBox('Win con 3 achieved - 8 Objectives')
 			end
 		end
+	--For Emblem Hitlist
+	else
+		--Increase stats based on Emblems
+		local emblemCount = ReadByte(Save+0x363D)
+		local str = 0
+		local mag = 0
+		local def = math.floor(emblemCount / 3) --Sora
+		local def_p = math.floor(emblemCount / 2) --Party Members
+		local app = emblemCount * 3
+
+		for em = 0, emblemCount do
+			if em <= 15 then
+				str = str + 1
+				mag = mag + 1
+			elseif em > 15 and em <= 35 then
+				str = str + 2
+				mag = mag + 2
+			else
+				str = str + 3
+				mag = mag + 3
+			end
+		end
+		WriteByte(Save+0x24F9,str)
+		WriteByte(Save+0x24FA,mag)
+		WriteByte(Save+0x24FB,def)
+		WriteByte(Save+0x24F8,50 + app)
+		----party members, add defense
+		WriteByte(Save+0x260F,def_p)
+		WriteByte(Save+0x2723,def_p)
+		WriteByte(Save+0x294B,def_p)
+		WriteByte(Save+0x2A5F,def_p)
+		WriteByte(Save+0x2B73,def_p)
+		WriteByte(Save+0x2C87,def_p)
+		WriteByte(Save+0x2D9B,def_p)
+		WriteByte(Save+0x2EAF,def_p)
+		WriteByte(Save+0x2FC3,def_p)
+		WriteByte(Save+0x30D7,def_p)
+		WriteByte(Save+0x31EB,def_p)
+		----party members, add defense
+		--------Force equip no exp
+		local NoExpCount = 0 --no exps equipped
+		for Slot = 0,68 do
+			local Current = Save + 0x2544 + 2*Slot
+			local Ability = ReadShort(Current) & 0x0FFF
+			--No Exp Check
+			if Ability == 0x0194 and NoExpCount == 0 then
+				WriteShort(Current,Ability+0x8000)
+				NoExpCount = NoExpCount + 1
+			end
+		end
+		--------Force equip no exp
 	end
 end
 --Garden of Assemblage Rearrangement
@@ -770,11 +973,12 @@ end
 --DUMMY 23 = Maximum HP Increased!
 while ReadByte(Save+0x3671) > 0 do
 	local Bonus
-	if ReadByte(Save+0x2498) < 3 then --Non-Critical
-		Bonus = 5
-	else --Critical
-		Bonus = 2
-	end
+	--if ReadByte(Save+0x2498) < 3 then --Non-Critical
+	--	Bonus = 5
+	--else --Critical
+	--	Bonus = 2
+	--end
+	local Bonus = 2
 	WriteInt(Slot1+0x000,ReadInt(Slot1+0x000)+Bonus)
 	WriteInt(Slot1+0x004,ReadInt(Slot1+0x004)+Bonus)
 	WriteByte(Save+0x3671,ReadByte(Save+0x3671)-1)
@@ -918,14 +1122,22 @@ end
 --Show all items in shops (ASSEMBLY edit)
 if not OnPC then
 	WriteInt(0x264250,0)
-elseif ReadLong(0x2FAA22) == 0x43B70F0D74D68541 then --Epic Global
+elseif ReadLong(0x2FAA22) == 0x43B70F0D74D68541 then --Epic Global v.9
 	WriteByte(0x2FAA26,0)
-elseif ReadLong(0x2FA682) == 0x43B70F0D74D68541 then --Epic JP
+elseif ReadLong(0x2FA682) == 0x43B70F0D74D68541 then --Epic JP v.9
 	WriteByte(0x2FA686,0)
-elseif ReadLong(0x2FB562) == 0x43B70F0D74D68541 then --Steam Global
+elseif ReadLong(0x2FB562) == 0x43B70F0D74D68541 then --Steam Global Downpatch
 	WriteByte(0x2FB566,0)
-elseif ReadLong(0x2FB2E2) == 0x43B70F0D74D68541 then --Steam JP
+elseif ReadLong(0x2FB2E2) == 0x43B70F0D74D68541 then --Steam JP Downpatch
 	WriteByte(0x2FB2E6,0)
+elseif ReadLong(0x2FAD62) == 0x43B70F0D74D68541 then --Epic Global v.10
+	WriteByte(0x2FAD66,0)
+elseif ReadLong(0x2FABA2) == 0x43B70F0D74D68541 then --Epic JP v.10
+	WriteByte(0x2FABA6,0)
+elseif ReadLong(0x2FB8A2) == 0x43B70F0D74D68541 then --Steam Global Updated
+	WriteByte(0x2FB8A6,0)
+elseif ReadLong(0x2FB622) == 0x43B70F0D74D68541 then --Steam JP Updated
+	WriteByte(0x2FB626,0)
 end
 --Alternate Party Models (adding new UCM using MEMT causes problems when shopping)
 if World == 0x0C and Place ~= 0x070C then --Mage & Knight (KH I)
@@ -2691,7 +2903,7 @@ truePageCount = truePageCount + ReadByte(Save+0x3598)
 --Forms
 local formCount = 0
 --Valor
-if ReadByte(Save+0x36C0)&0x2 == 0x2 then
+if ReadByte(Save+0x36C0)&0x80 == 0x80 then
 	formCount = formCount + 1
 end
 --Wisdom
@@ -2707,7 +2919,7 @@ if ReadByte(Save+0x36C0)&0x10 == 0x10 then
 	formCount = formCount + 1
 end
 --Final
-if ReadByte(Save+0x36C0)&0x40 == 0x40 then
+if ReadByte(Save+0x36C2)&0x02 == 0x02 then
 	formCount = formCount + 1
 end
 
@@ -2923,7 +3135,7 @@ while ReadByte(Save+0x363D) > ReadByte(Save+0x360A) do
 		if ReadByte(Save+0x360D)&0x40 == 0x40 then
 			BitOr(Save+0x360D,0x80)
 		end
-	elseif World == 0x04 and Room == 0x22 and Btl == 0x98 then --AS Zexion
+	elseif World == 0x04 and Room == 0x22 and Btl == 0x97 then --AS Zexion
 		if ReadByte(Save+0x360D)&0x40 == 0x40 and ReadByte(Save+0x360D)&0x80 == 0x80 then
 			DropCounter()
 		end
@@ -2933,7 +3145,7 @@ while ReadByte(Save+0x363D) > ReadByte(Save+0x360A) do
 		BitOr(Save+0x360E,0x1)
 	elseif World == 0x07 and Room == 0x05 and Btl == 0x3E then --Genie Jafar
 		BitOr(Save+0x360E,0x2)
-	elseif World == 0x04 and Room == 0x21 and Btl == 0x93 then --AS Lexaeus
+	elseif World == 0x04 and Room == 0x21 and Btl == 0x8E then --AS Lexaeus
 		if ReadByte(Save+0x360E)&0x1 == 0x1 and ReadByte(Save+0x360E)&0x2 == 0x2 then
 			DropCounter()
 		end
@@ -3045,11 +3257,52 @@ while ReadByte(Save+0x363D) > ReadByte(Save+0x360A) do
 		end
 	end
 end
+--Show skipped count by number of (reskinned) Orichalcum+'s
+WriteByte(Save+0x363B,ReadByte(Save+0x360C))
 end
 function DropCounter()
 	WriteByte(Save+0x363D,ReadByte(Save+0x363D)-1)
 	WriteByte(Save+0x360A,ReadByte(Save+0x360A)-1)
 	WriteByte(Save+0x360C,ReadByte(Save+0x360C)+1)
+end
+
+function NoExp()
+	--------Checks for Current room
+	--if going to a new room
+    if bulky_World ~= ReadByte(Now + 0x00) or bulky_Room ~= ReadByte(Now + 0x01) then
+		bulky_lastWorld = bulky_World
+		bulky_lastRoom = bulky_Room
+	end
+	bulky_World = ReadByte(Now + 0x00)
+	bulky_Room = ReadByte(Now + 0x01)
+
+	local equip = false
+	if bulky_World == 0x02 and bulky_Room == 0x21 and --in Station of Calling
+	    ((bulky_lastWorld == 0x04 and bulky_lastRoom == 0x1A) or --GoA
+	    (bulky_lastWorld == 0x12 and bulky_lastRoom == 0x1B) or --Buildings
+		(bulky_lastWorld == 0x12 and bulky_lastRoom == 0x1C)) then --Other Buildings
+		--print("In promise charm room")
+		equip = true
+	end
+
+	--------Force equip no exp
+    local NoExpCount = 0 --no exps equipped
+    for Slot = 0,68 do
+        local Current = Save + 0x2544 + 2*Slot
+        local Ability = ReadShort(Current) & 0x0FFF
+		--No Exp Check
+        if Ability == 0x0194 then
+			--if not equipped and supposed to equip
+			if equip then
+                WriteShort(Current,Ability+0x8000)
+				--print("equipping")
+            else
+				WriteShort(Current,Ability)
+				--print("Unequipping")
+			end
+		end
+    end
+	--------Force equip no exp
 end
 
 --[[Unused Bytes Repurposed:
@@ -3091,3 +3344,93 @@ Save+0x1EDF TWtNW Progress
 Save+0x35C4 Ollete's Munny Pouch
 Save+0x35C5 Mickey's Munny Pouch
 --]]
+
+--still missing icon support and special things like color/size/ect.
+CharSet = {['０'] = 0x21, ['１'] = 0x22, ['２'] = 0x23, ['３'] = 0x24, ['４'] = 0x25, ['５'] = 0x26, ['６'] = 0x27, 
+['７'] = 0x28, ['８'] = 0x29, ['９'] = 0x2a, ['+'] = 0x2b, ['−'] = 0x2c, ['ₓ'] = 0x2d, ['A'] = 0x2e, ['B'] = 0x2f, 
+['C'] = 0x30, ['D'] = 0x31, ['E'] = 0x32, ['F'] = 0x33, ['G'] = 0x34, ['H'] = 0x35, ['I'] = 0x36, ['J'] = 0x37, 
+['K'] = 0x38, ['L'] = 0x39, ['M'] = 0x3a, ['N'] = 0x3b, ['O'] = 0x3c, ['P'] = 0x3d, ['Q'] = 0x3e, ['R'] = 0x3f, 
+['S'] = 0x40, ['T'] = 0x41, ['U'] = 0x42, ['V'] = 0x43, ['W'] = 0x44, ['X'] = 0x45, ['Y'] = 0x46, ['Z'] = 0x47, 
+['!'] = 0x48, ['?'] = 0x49, ['%'] = 0x4a, ['/'] = 0x4b, ['※'] = 0x4c, ['、'] = 0x4d, ['。'] = 0x4e, ['.'] = 0x4f, 
+[','] = 0x50, [';'] = 0x51, [':'] = 0x52, ['…'] = 0x53, ["-"] = 0x54, ['–'] = 0x55, ['〜'] = 0x56, ["'"] = 0x57, 
+['('] = 0x5a, [')'] = 0x5b, ['「'] = 0x5c, ['」'] = 0x5d, ['『'] = 0x5e, ['』'] = 0x5f, ['“'] = 0x60, ['”'] = 0x61, 
+['['] = 0x62, [']'] = 0x63, ['<'] = 0x64, ['>'] = 0x65, ['-'] = 0x66, ["–"] = 0x67, ['◯'] = 0x6c, ['✕'] = 0x6d, 
+--these kinda don't exactly work as single character searches, huh?
+--["I"] = 0x74, ["II"] = 0x75, ["III"] = 0x76, ["IV"] = 0x77, ["V"] = 0x78, ["VI"] = 0x79, ["VII"] = 0x7a, ["VIII"] = 0x7b, 
+--["IX"] = 0x7c, ["X"] = 0x7d, ["XIII"] = 0x7e, ["XI"] = 0x84, ["XII"] = 0x85,
+['α'] = 0x7f,['β'] = 0x80, ['γ'] = 0x81, 
+['&'] = 0x86, ['#'] = 0x87, ['®'] = 0x88, ['▴'] = 0x89, ['▾'] = 0x8a, ['▸'] = 0x8b, ['◂'] = 0x8c, ['°'] = 0x8d, 
+["♪"] = 0x8e, ['0'] = 0x90, ['1'] = 0x91, ['2'] = 0x92, ['3'] = 0x93, ['4'] = 0x94, ['5'] = 0x95, ['6'] = 0x96, 
+['7'] = 0x97, ['8'] = 0x98, ['9'] = 0x99, ['a'] = 0x9a, ['b'] = 0x9b, ['c'] = 0x9c, ['d'] = 0x9d, ['e'] = 0x9e, 
+['f'] = 0x9f, ['g'] = 0xa0, ['h'] = 0xa1, ['i'] = 0xa2, ['j'] = 0xa3, ['k'] = 0xa4, ['l'] = 0xa5, ['m'] = 0xa6, 
+['n'] = 0xa7, ['o'] = 0xa8, ['p'] = 0xa9, ['q'] = 0xaa, ['r'] = 0xab, ['s'] = 0xac, ['t'] = 0xad, ['u'] = 0xae, 
+['v'] = 0xaf, ['w'] = 0xb0, ['x'] = 0xb1, ['y'] = 0xb2, ['z'] = 0xb3, ['Æ'] = 0xb4, ['æ'] = 0xb5, ['ß'] = 0xb6, 
+['à'] = 0xb7, ['á'] = 0xb8, ['â'] = 0xb9, ['ä'] = 0xba, ['è'] = 0xbb, ['é'] = 0xbc, ['ê'] = 0xbd, ['ë'] = 0xbe, 
+['ì'] = 0xbf, ['í'] = 0xc0, ['î'] = 0xc1, ['ï'] = 0xc2, ['ñ'] = 0xc3, ['ò'] = 0xc4, ['ó'] = 0xc5, ['ô'] = 0xc6, 
+['ö'] = 0xc7, ['ù'] = 0xc8, ['ú'] = 0xc9, ['û'] = 0xca, ['ü'] = 0xcb, ['º'] = 0xcc, ['—'] = 0xcd, ['»'] = 0xce, 
+['«'] = 0xcf, ['À'] = 0xd0, ['Á'] = 0xd1, ['Â'] = 0xd2, ['Ä'] = 0xd3, ['È'] = 0xd4, ['É'] = 0xd5, ['Ê'] = 0xd6, 
+['Ë'] = 0xd7, ['Ì'] = 0xd8, ['Í'] = 0xd9, ['Î'] = 0xda, ['Ï'] = 0xdb, ['Ñ'] = 0xdc, ['Ò'] = 0xdd, ['Ó'] = 0xde, 
+['Ô'] = 0xdf, ['Ö'] = 0xe0, ['Ù'] = 0xe1, ['Ú'] = 0xe2, ['Û'] = 0xe3, ['Ü'] = 0xe4, ['¡'] = 0xe5, ['¿'] = 0xe6, 
+['Ç'] = 0xe7, ['ç'] = 0xe8, ['‛'] = 0xe9, ['’'] = 0xea, ['`'] = 0xeb, ['´'] = 0xec, ['"'] = 0xed, ['★'] = 0xef, 
+['☆'] = 0xf0, ['■'] = 0xf1, ['□'] = 0xf2, ['▲'] = 0xf3, ['△'] = 0xf4, ['●'] = 0xf5, ['○'] = 0xf6, ['♪'] = 0xf7, 
+['♫'] = 0xf8, ['→'] = 0xf9, ['←'] = 0xfa, ['↑'] = 0xfb, ['↓'] = 0xfc, ['・'] = 0xfd, ['❤'] = 0xfe}
+
+function Text2khscii(item_name)
+	out_list = {}
+	char_count = 0
+	
+
+	--Throughout the text, do:
+	while char_count < utf8.len(item_name) do
+		--get character
+		char = utf8.sub(item_name, char_count+1, char_count+1)
+		--check if exists in dict, then grab khscii value if it does
+		if CharSet[char] ~= nil then
+			table.insert(out_list, CharSet[char])
+		else --can't find, so use 0x01 (a blank space)
+			table.insert(out_list, 0x01)
+		end
+		
+		--incrament char count num for next
+		char_count = char_count + 1
+	end
+	
+	--null terminator at end
+	table.insert(out_list, 0x00)
+	
+    return out_list
+end
+
+--I HATE UTF8 ALL MY HOMIES HATE LUA TOO
+--thank ouy mr ihf from stackoverflow. my hero
+function utf8.sub(s,i,j)
+    i=utf8.offset(s,i)
+    j=utf8.offset(s,j+1)-1
+    return string.sub(s,i,j)
+end
+
+function WriteInfoBox(text)
+	if GameVersion == 5 or GameVersion == 6 or GameVersion == 7 then
+		infoBoxText = text
+		txt = Text2khscii(text)
+		WriteArray(0x800004, txt)
+		doInfoBox = true
+	end
+end
+function ShowInfoBox()
+	if GameVersion == 5 or GameVersion == 6 or GameVersion == 7 then
+		WriteByte(0x800000, 0x01)
+	end
+end
+
+function WinConInfoBox() --Used to check when the wincon is achieved at when to display it
+	if ReadByte(Cntrl) == 0 and (ReadByte(BtlTyp) == 0 or ReadByte(BtlTyp) == 1) and doInfoBox then
+		infoBoxTick = infoBoxTick + 1
+		if infoBoxTick > 10 then --after 10 frames?
+			print(infoBoxText)
+			ShowInfoBox()
+			doInfoBox = false
+			infoBoxTick = 0
+		end
+	end
+end
